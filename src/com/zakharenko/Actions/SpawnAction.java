@@ -4,41 +4,18 @@ import com.zakharenko.Coordinates;
 import com.zakharenko.Enities.*;
 import com.zakharenko.Map;
 
-import java.util.Random;
+public abstract class SpawnAction<T extends Entity> extends Action {
+    protected int countTypeOnMap;
 
-import static com.zakharenko.Map.MAP_HEIGHT;
-import static com.zakharenko.Map.MAP_WEIGHT;
-
-public class SpawnAction {
-    static Random random = new Random();
-
-    public static Coordinates getEmptyPlaceRandom(Map map){
-        while (true) {
-            Coordinates coordinates = new Coordinates(
-                    random.nextInt(MAP_HEIGHT + 1),//Y
-                    random.nextInt(MAP_WEIGHT + 1));//X
-            if (map.isPlaceEmpty(coordinates)) return coordinates;
+    @Override
+    public void perform(Map map) {
+        int currentRate = 0;
+        while (currentRate < countTypeOnMap) {
+            Coordinates coordinates = map.getEmptyPlaceRandom();
+            map.setEntity(coordinates, spawnEntity(coordinates));
+            currentRate++;
         }
     }
 
-    public static void fillMapWithCreaturesRandom(Map map){
-
-        //Replace
-        for (int rock = 0; rock < 40; rock++) {
-            Coordinates coordinates = getEmptyPlaceRandom(map);
-            map.setEntity(coordinates, new Rock(coordinates));
-        }
-        for (int grass = 0; grass < 30; grass++) {
-            Coordinates coordinates = getEmptyPlaceRandom(map);
-            map.setEntity(coordinates, new Grass(coordinates));
-        }
-        for (int herbivore = 0; herbivore < 10; herbivore++) {
-            Coordinates coordinates = getEmptyPlaceRandom(map);
-            map.setEntity(coordinates, new Herbivore(coordinates,2,40));
-        }
-        for (int predator = 0; predator < 5; predator++) {
-            Coordinates coordinates = getEmptyPlaceRandom(map);
-            map.setEntity(coordinates, new Predator(coordinates,1,50,10));
-        }
-    }
+    protected abstract T spawnEntity(Coordinates coordinates);
 }

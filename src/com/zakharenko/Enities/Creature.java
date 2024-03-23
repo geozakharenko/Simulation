@@ -1,35 +1,61 @@
 package com.zakharenko.Enities;
 
 import com.zakharenko.Coordinates;
+import com.zakharenko.FinderAlgorithm.BreadthFirstSearch;
 import com.zakharenko.Map;
 
+import java.util.List;
+
 abstract public class Creature extends Entity {
+    private final Class<? extends Entity> victim;
     private final int speed;
+    private final int maxHealth;
     private int health;
 
-    public int getHealth() {
-        return this.health;
+    protected int getHealth() {
+        return health;
     }
 
-    public int getSpeed() {
+    protected int getSpeed() {
         return speed;
     }
 
-    public void setHealth(int health) {
+    protected void setHealth(int health) {
         this.health = health;
     }
-    public void famine() {
-        this.health--;
+
+    protected void famine() {
+        health--;
     }
-    public void ate(Coordinates start, Coordinates to, Map map) {
+
+    protected void eat(Coordinates start, Coordinates to, Map map) {
         map.moveEntity(start, to);
-        this.health+=15;
+        health += 16;
+        if (maxHealth < health) health = maxHealth;
     }
-    public Creature(Coordinates coordinates, int speed, int health) {
+
+    public Creature(Coordinates coordinates) {
         super(coordinates);
-        this.speed = speed;
-        this.health = health;
+        victim = this.getClass() == Predator.class ? Herbivore.class : Grass.class;
+        speed = this.getClass() == Predator.class ? 1 : 2;
+        health = this.getClass() == Predator.class ? 48 : 20;
+        maxHealth = health;
     }
-    //Create normal realization
-    public abstract void makeMove(Coordinates start, Map map);
+
+    public void makeMove(Coordinates start, Map map) {
+        if (health > 0) {
+            List<Coordinates> path = BreadthFirstSearch.get(start, map);
+            if (path.size() > 1) {
+                int amountOfSpeed = Math.min(getSpeed(), path.size() - 1);
+                Coordinates to = path.get(amountOfSpeed);
+                if (to == null || this.getClass().isInstance(map.getEntity(to))) return;
+                if (victim.isInstance(map.getEntity(to))) {
+                    eat(start, to, map);
+                    return;
+                }
+                map.moveEntity(start, to);
+            }
+            famine();
+        } else map.removeEntity(start);
+    }
 }

@@ -3,8 +3,8 @@ package com.zakharenko;
 import com.zakharenko.Enities.Entity;
 
 public class MapRenderer {
-    public static final String WHITE_BACKGROUND_BRIGHT = "\033[0;107m"; // WHITE
-    public static final String RESET = "\033[0m"; // Text Reset
+    private static final String WHITE_BACKGROUND_BRIGHT = "\033[0;107m";
+    private static final String RESET = "\033[0m";
 
     public void render(Map map) {
         for (int height = Map.MAP_HEIGHT; height >= 0; height--) {
@@ -22,14 +22,13 @@ public class MapRenderer {
         }
     }
 
-    public String colorizeSprite(String sprite) {
+    private String colorizeSprite(String sprite) {
         String result = sprite;
         result = WHITE_BACKGROUND_BRIGHT + result;
         return result;
     }
 
     private String getEntitySprite(Entity entity) {
-
         return colorizeSprite(selectUnicodeSpriteForEntity(entity));
     }
 

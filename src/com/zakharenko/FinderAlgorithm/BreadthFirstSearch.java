@@ -3,6 +3,7 @@ package com.zakharenko.FinderAlgorithm;
 import com.zakharenko.Coordinates;
 import com.zakharenko.Enities.*;
 import com.zakharenko.Map;
+
 import java.util.*;
 
 import static com.zakharenko.Map.MAP_HEIGHT;
@@ -19,15 +20,15 @@ public class BreadthFirstSearch {
     }
 
     private static List<Coordinates> findShortestPathToResult(Coordinates startNode, Map map) {
-        Queue<Coordinates> queue = new LinkedList<>();// queue for BFS
-        java.util.Map<Coordinates, Coordinates> parentMap = new HashMap<>(); //Map for restore path
-        Set<Coordinates> list = new HashSet<>(); // visited Nodes
+        Queue<Coordinates> queue = new LinkedList<>();
+        java.util.Map<Coordinates, Coordinates> parentMap = new HashMap<>();
+        Set<Coordinates> visitedList = new HashSet<>();
         Coordinates resultNode = null;
 
         queue.add(startNode);
 
         while (!queue.isEmpty()) {
-            list.add(queue.element());
+            visitedList.add(queue.element());
             Coordinates current = queue.remove();
 
             if (!(map.isPlaceEmpty(current)) && IsItPurpose(current, map)) {
@@ -38,10 +39,10 @@ public class BreadthFirstSearch {
             List<Coordinates> nodesAround = getNodesWithinBorders(current, map);
 
             for (Coordinates node : nodesAround) {
-                if (!(list.contains(node) || queue.contains(node))) {
+                if (!(visitedList.contains(node) || queue.contains(node))) {
                     parentMap.put(node, current);
                     queue.offer(node);
-                    list.add(node);
+                    visitedList.add(node);
                 }
             }
         }
@@ -55,18 +56,18 @@ public class BreadthFirstSearch {
         return path;
     }
 
-    public static List<Coordinates> getNodesWithinBorders(Coordinates current, Map map) {
+    private static List<Coordinates> getNodesWithinBorders(Coordinates current, Map map) {
         List<Coordinates> nodesAround = new ArrayList<>();
         int cordY = current.getCordY();
         int cordX = current.getCordX();
 
-        if (!(cordY - 1 < 0) && ItIsNotACreatureOrRock(cordY - 1, cordX, map))
+        if (!(cordY - 1 < 0) && ItIsNotABarrier(cordY - 1, cordX, map))
             nodesAround.add(new Coordinates(cordY - 1, cordX));
-        if (!(cordX + 1 > MAP_WEIGHT) && ItIsNotACreatureOrRock(cordY, cordX + 1, map))
+        if (!(cordX + 1 > MAP_WEIGHT) && ItIsNotABarrier(cordY, cordX + 1, map))
             nodesAround.add(new Coordinates(cordY, cordX + 1));
-        if (!(cordY + 1 > MAP_HEIGHT) && ItIsNotACreatureOrRock(cordY + 1, cordX, map))
+        if (!(cordY + 1 > MAP_HEIGHT) && ItIsNotABarrier(cordY + 1, cordX, map))
             nodesAround.add(new Coordinates(cordY + 1, cordX));
-        if (!(cordX - 1 < 0) && ItIsNotACreatureOrRock(cordY, cordX - 1, map))
+        if (!(cordX - 1 < 0) && ItIsNotABarrier(cordY, cordX - 1, map))
             nodesAround.add(new Coordinates(cordY, cordX - 1));
         return nodesAround;
     }
@@ -76,9 +77,10 @@ public class BreadthFirstSearch {
         return map.getEntity(node) instanceof Grass;
     }
 
-    private static boolean ItIsNotACreatureOrRock(int y, int x, Map map) {
+    private static boolean ItIsNotABarrier(int y, int x, Map map) {
         Entity entity = map.getEntity(new Coordinates(y, x));
-        if (isPredator) return !(entity instanceof Predator | entity instanceof Rock);
-        return !(entity instanceof Creature | entity instanceof Rock);
+        if (isPredator) return !(entity instanceof Predator || entity instanceof Rock ||
+                entity instanceof Grass);
+        return !(entity instanceof Creature || entity instanceof Rock);
     }
 }
