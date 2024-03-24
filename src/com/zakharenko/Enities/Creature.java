@@ -44,7 +44,7 @@ abstract public class Creature extends Entity {
 
     public void makeMove(Coordinates start, Map map) {
         if (health > 0) {
-            List<Coordinates> path = BreadthFirstSearch.get(start, map);
+            List<Coordinates> path = BreadthFirstSearch.get(start, map, victim);
             if (path.size() > 1) {
                 int amountOfSpeed = Math.min(getSpeed(), path.size() - 1);
                 Coordinates to = path.get(amountOfSpeed);

@@ -10,13 +10,11 @@ import static com.zakharenko.Map.MAP_HEIGHT;
 import static com.zakharenko.Map.MAP_WEIGHT;
 
 public class BreadthFirstSearch {
-    static boolean isPredator;
+    static Class<? extends Entity> victim;
 
-    public static List<Coordinates> get(Coordinates startNode, Map map) {
-        if (map.getEntity(startNode) instanceof Predator) isPredator = true;
-        List<Coordinates> shortestPathToResult = findShortestPathToResult(startNode, map);
-        isPredator = false;
-        return shortestPathToResult;
+    public static List<Coordinates> get(Coordinates startNode, Map map, Class<? extends Entity> victim) {
+        BreadthFirstSearch.victim = victim;
+        return findShortestPathToResult(startNode, map);
     }
 
     private static List<Coordinates> findShortestPathToResult(Coordinates startNode, Map map) {
@@ -31,7 +29,7 @@ public class BreadthFirstSearch {
             visitedList.add(queue.element());
             Coordinates current = queue.remove();
 
-            if (!(map.isPlaceEmpty(current)) && IsItPurpose(current, map)) {
+            if (!(map.isPlaceEmpty(current)) && map.getEntity(current).getClass() == victim) {
                 resultNode = current;
                 break;
             }
@@ -72,14 +70,9 @@ public class BreadthFirstSearch {
         return nodesAround;
     }
 
-    private static boolean IsItPurpose(Coordinates node, Map map) {
-        if (isPredator) return map.getEntity(node) instanceof Herbivore;
-        return map.getEntity(node) instanceof Grass;
-    }
-
     private static boolean ItIsNotABarrier(int y, int x, Map map) {
         Entity entity = map.getEntity(new Coordinates(y, x));
-        if (isPredator) return !(entity instanceof Predator || entity instanceof Rock ||
+        if (victim == Herbivore.class) return !(entity instanceof Predator || entity instanceof Rock ||
                 entity instanceof Grass);
         return !(entity instanceof Creature || entity instanceof Rock);
     }
